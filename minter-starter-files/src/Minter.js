@@ -1,33 +1,26 @@
 import { useEffect, useState } from "react";
-import { connectWallet } from "./utils/interact";
-import { getCurrentWalletConnected } from "./utils/interact";
+import {
+  connectWallet,
+  getCurrentWalletConnected,
+  mintNFT,
+} from "./util/interact.js";
 
 const Minter = (props) => {
-
-  //State variables
   const [walletAddress, setWallet] = useState("");
   const [status, setStatus] = useState("");
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setURL] = useState("");
 
   useEffect(async () => {
-    const {address, status} = await getCurrentWalletConnected();
-    setWallet(address)
+    const { address, status } = await getCurrentWalletConnected();
+
+    setWallet(address);
     setStatus(status);
 
     addWalletListener();
-}, []);
- 
-  useEffect(async () => { //TODO: implement
-    
   }, []);
-
-  const connectWalletPressed = async () => {
-    const walletResponse = await connectWallet();
-    setStatus(walletResponse.status);
-    setWallet(walletResponse.address);
-  };
 
   function addWalletListener() {
     if (window.ethereum) {
@@ -54,8 +47,20 @@ const Minter = (props) => {
     }
   }
 
-  const onMintPressed = async () => { //TODO: implement
-    
+  const connectWalletPressed = async () => {
+    const walletResponse = await connectWallet();
+    setStatus(walletResponse.status);
+    setWallet(walletResponse.address);
+  };
+
+  const onMintPressed = async () => {
+    const { success, status } = await mintNFT(url, name, description);
+    setStatus(status);
+    if (success) {
+      setName("");
+      setDescription("");
+      setURL("");
+    }
   };
 
   return (
@@ -99,7 +104,7 @@ const Minter = (props) => {
       <button id="mintButton" onClick={onMintPressed}>
         Mint NFT
       </button>
-      <p id="status">
+      <p id="status" style={{ color: "red" }}>
         {status}
       </p>
     </div>
